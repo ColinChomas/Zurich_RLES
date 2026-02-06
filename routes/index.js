@@ -5,7 +5,7 @@ const express = require( 'express' ),
 // establish database connection
 const client = new Client({
   host: 'localhost',
-  database: 'siteinfo',
+  database: 'zurichdb',
   user: 'student',
   password: 'student',
   port: 5432,
