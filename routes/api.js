@@ -19,14 +19,9 @@ const sendError = (res, error) => {
 };
 
 // health check
-router.get('/health', async (req, res) => {
-  try {
-    res.status(200).json({ status: 'ok' })
-  } catch (error) {
-    sendError(res, error);
-  }
+router.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
 });
-
 // apiary
 router.get('/apiaries', async (req, res) => {
   try {
