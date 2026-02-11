@@ -1,22 +1,31 @@
 const express = require('express');
 const { Pool } = require('pg');
 
-const router = express.Router();
+const router = express.Router('/api');
 
 // TODO: Add auth (API key or session) when requirements are defined.
 
 const pool = new Pool({
-  host: 'localhost',
-  database: 'zurichdb',
-  user: 'student',
-  password: 'student',
-  port: 5432,
+  host: process.env.PGHOST,
+  database: process.env.PGDATABASE,
+  user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  port: Number(process.env.PGPORT),
 });
 
 const sendError = (res, error) => {
   console.error(error);
   res.status(500).json({ error: 'Internal Server Error' });
 };
+
+// health check
+router.get('/health', async (req, res) => {
+  try {
+    res.status(200).json({ status: 'ok' })
+  } catch (error) {
+    sendError(res, error);
+  }
+});
 
 // apiary
 router.get('/apiaries', async (req, res) => {
