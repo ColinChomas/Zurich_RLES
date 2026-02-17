@@ -1,7 +1,7 @@
 const express = require('express');
 const { Pool } = require('pg');
 
-const router = express.Router('/api');
+const router = express.Router();
 
 // TODO: Add auth (API key or session) when requirements are defined.
 
