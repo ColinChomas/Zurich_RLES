@@ -6,7 +6,7 @@ async function getApiaries(){
 
 async function getApiary(id){
   return (await pool.query(
-    "SELECT * FROM apiary WHERE apiaryid=$1",[id]
+    "SELECT * FROM apiary WHERE apiaryID=$1",[id]
   )).rows[0];
 }
 
@@ -19,13 +19,13 @@ async function createApiary(name,zipcode){
 
 async function updateApiary(id,name,zipcode){
   return (await pool.query(
-    "UPDATE apiary SET name=$1,zipcode=$2 WHERE apiaryid=$3 RETURNING *",
+    "UPDATE apiary SET name=$1,zipcode=$2 WHERE apiaryID=$3 RETURNING *",
     [name,zipcode,id]
   )).rows[0];
 }
 
 async function deleteApiary(id){
-  await pool.query("DELETE FROM apiary WHERE apiaryid=$1",[id]);
+  await pool.query("DELETE FROM apiary WHERE apiaryID=$1",[id]);
 }
 
 async function getHives(){
@@ -34,34 +34,34 @@ async function getHives(){
 
 async function getHive(id){
   return (await pool.query(
-    "SELECT * FROM hive WHERE hiveid=$1",[id]
+    "SELECT * FROM hive WHERE hiveID=$1",[id]
   )).rows[0];
 }
 
 async function createHive(hiveName,apiaryId){
   return (await pool.query(
-    "INSERT INTO hive(hivename,apiaryid) VALUES($1,$2) RETURNING *",
+    "INSERT INTO hive(hiveName,apiaryID) VALUES($1,$2) RETURNING *",
     [hiveName,apiaryId]
   )).rows[0];
 }
 
 async function updateHive(id,name){
   return (await pool.query(
-    "UPDATE hive SET hivename=$1 WHERE hiveid=$2 RETURNING *",
+    "UPDATE hive SET hiveName=$1 WHERE hiveID=$2 RETURNING *",
     [name,id]
   )).rows[0];
 }
 
 async function deleteHive(id){
-  await pool.query("DELETE FROM hive WHERE hiveid=$1",[id]);
+  await pool.query("DELETE FROM hive WHERE hiveID=$1",[id]);
 }
 
 async function insertHiveAnalytics(data){
   const {hiveId,temperature,weight,pressure,humidity,beeDeparture} = data;
 
   return (await pool.query(
-    `INSERT INTO hiveanalytics
-    (hiveid,temperature,weight,pressure,humidity,beedeparture,measuredat,ingestedat)
+    `INSERT INTO hiveAnalytics
+    (hiveID,temperature,weight,pressure,humidity,beeDeparture,createdAt,generatedAt)
     VALUES($1,$2,$3,$4,$5,$6,NOW(),NOW())
     RETURNING *`,
     [hiveId,temperature,weight,pressure,humidity,beeDeparture]
@@ -70,28 +70,27 @@ async function insertHiveAnalytics(data){
 
 async function insertOutside(apiaryId,temp){
   return (await pool.query(
-    "INSERT INTO outsideanalytics(apiaryid,temperature,createdat) VALUES($1,$2,NOW()) RETURNING *",
+    "INSERT INTO outsideAnalytics(apiaryID,temperature,createdAt) VALUES($1,$2,NOW()) RETURNING *",
     [apiaryId,temp]
   )).rows[0];
 }
 
-async function insertKey(hiveId,hash,prefix){
+async function insertCredential(hash,apiaryId){
   return (await pool.query(
-    "INSERT INTO hive_api_keys(hiveid,keyhash,keyprefix,isactive,createdat) VALUES($1,$2,$3,true,NOW()) RETURNING *",
-    [hiveId,hash,prefix]
+    "INSERT INTO credentials(hashedKey,apiaryID,createdAt) VALUES($1,$2,NOW()) RETURNING *",
+    [hash,apiaryId]
   )).rows[0];
 }
 
-async function revokeKey(id){
-  return (await pool.query(
-    "UPDATE hive_api_keys SET isactive=false WHERE keyid=$1 RETURNING *",
-    [id]
-  )).rows[0];
+async function revokeCredential(hash){
+  await pool.query(
+    "DELETE FROM credentials WHERE hashedKey=$1",[hash]
+  );
 }
 
-async function findKey(hash){
+async function findCredential(hash){
   return (await pool.query(
-    "SELECT * FROM hive_api_keys WHERE keyhash=$1 AND isactive=true",
+    "SELECT * FROM credentials WHERE hashedKey=$1",
     [hash]
   )).rows[0];
 }
@@ -109,7 +108,7 @@ module.exports = {
   deleteHive,
   insertHiveAnalytics,
   insertOutside,
-  insertKey,
-  revokeKey,
-  findKey
+  insertCredential,
+  revokeCredential,
+  findCredential
 };
